@@ -2,6 +2,14 @@ import { useFormik } from "formik";
 import { Link } from "react-router-dom";
 import * as Yup from "yup";
 import Layout from "../Layout/Layout";
+import { signUpService } from "../services/signupService";
+import { useEffect, useState } from "react";
+import { useAuth, useAuthAction } from "../providers/AuthProvider";
+import { useQuery } from "../hooks/useQuery";
+
+
+
+
 
 const initialValues = {
   email: "",
@@ -31,15 +39,46 @@ const validationSchema = Yup.object({
     .nullable(),
 
 
-    passwordConfirm: Yup.string()
+  passwordConfirm: Yup.string()
     .required("Pasword Confirmation is Required")
     .oneOf([Yup.ref("password"), null], "Passwords must match"),
-    
+
 });
 
-const SignupPage = () => {
-  const submitHandler = (value) => {
-    console.log(value);
+const SignupPage = ({ history }) => {
+
+  const query = useQuery();
+
+  const redirect = query.get("kojabayadbere") || "/";
+
+
+  const isSignUp = useAuth()
+
+  useEffect(() => {
+    if (isSignUp) history.push(redirect)
+  }, [redirect, isSignUp])
+
+
+  const [errors, seterrors] = useState(null);
+
+  const setAuth = useAuthAction();
+
+
+  const submitHandler = async (value) => {
+    const { name, email, phoneNumber, password } = value
+    const userData = {
+      name, email, phoneNumber, password
+    }
+
+    try {
+      const { data } = await signUpService(userData);
+      setAuth(data)
+      localStorage.setItem("userData", JSON.stringify(data))
+      seterrors(null)
+      history.push(redirect)
+    } catch (error) {
+      seterrors(error.response.data.message)
+    }
   };
 
   const formik = useFormik({
@@ -154,15 +193,15 @@ const SignupPage = () => {
 
         <button
           disabled={!formik.isValid}
-          className={`w-5/6 p-1 rounded-xl my-4 text-white ${
-            formik.isValid
-              ? "bg-purple-800  "
-              : "bg-purple-500 cursor-not-allowed"
-          }`}
+          className={`w-5/6 p-1 rounded-xl my-4 text-white ${formik.isValid
+            ? "bg-purple-800  "
+            : "bg-purple-500 cursor-not-allowed"
+            }`}
         >
           sign up
         </button>
-        <Link to="/login">
+        {errors && <div className="text-center text-red-800">{errors}</div>}
+        <Link to="/login?kojabayadbere=checkout">
           <h6 className="text-sm text-purple-800">Do you have an account? </h6>
         </Link>
       </form>

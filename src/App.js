@@ -9,6 +9,7 @@ import CheckOut from "./pages/CheckOutPage";
 import LoginPage from "./pages/LoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import SignupPage from "./pages/SignupPage";
+import AuthProvider from "./providers/AuthProvider";
 
 
 
@@ -16,19 +17,22 @@ import SignupPage from "./pages/SignupPage";
 export default function App() {
   return (
     <>
-    <ToastContainer />
-      <CartProvider>
-        <BrowserRouter>
-          <Switch>
-            <Route path="/" exact={true} component={HomePage} />
-            <Route path="/cart" exact={true} component={Cart} />
-            <Route path="/checkout"  exact={true} component={CheckOut} />
-            <Route path="/login"  exact={true} component={LoginPage} />
-            <Route path="/signup"  exact={true} component={SignupPage} />
-            <Route component={NotFoundPage} />
-          </Switch>
-        </BrowserRouter>
-      </CartProvider>
+      <ToastContainer />
+      <AuthProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <Switch>
+              <Route path="/" exact={true} component={HomePage} />
+              <Route path="/cart" exact={true} component={Cart} />
+              <Route path="/checkout" exact={true} component={CheckOut} />
+              <Route path="/login" exact={true} component={LoginPage} />
+              <Route path="/signup" exact={true} component={SignupPage} />
+              <Route component={NotFoundPage} />
+            </Switch>
+          </BrowserRouter>
+        </CartProvider>
+      </AuthProvider>
+
     </>
   );
 }

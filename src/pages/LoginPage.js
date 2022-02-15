@@ -1,9 +1,13 @@
 import { useFormik } from "formik";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as Yup from "yup";
 import Layout from "../Layout/Layout";
 import { VscEye, VscEyeClosed } from "react-icons/vsc";
+import { loginService } from "../services/loginService";
+import { useAuth, useAuthAction } from "../providers/AuthProvider";
+import { useQuery } from "../hooks/useQuery";
+
 
 const initialValues = { email: "", password: "" };
 
@@ -17,11 +21,33 @@ const validationSchema = Yup.object({
     .required("Email is required !"),
 });
 
-const LoginPage = () => {
-  const [isShowPassword, setIsShowPassword] = useState(false);
+const LoginPage = ({ history }) => {
 
-  const submitHandler = (value) => {
-    console.log(value);
+  const query = useQuery();
+  const redirect = query.get("kojabayadbere") || "/";
+
+  const isLogin = useAuth();
+
+  useEffect(() => {
+    if (isLogin) history.push(redirect)
+  }, [redirect, isLogin])
+
+  const setAuth = useAuthAction();
+
+  const [isShowPassword, setIsShowPassword] = useState(false);
+  const [error, seterror] = useState(null);
+
+
+  const submitHandler = async (value) => {
+    try {
+      const { data } = await loginService(value);
+      setAuth(data);
+      localStorage.setItem("userData", JSON.stringify(data));
+      seterror(null);
+      history.push(redirect);
+    } catch (error) {
+      seterror(error.response.data.message);
+    }
   };
 
   const formik = useFormik({
@@ -60,7 +86,7 @@ const LoginPage = () => {
           )}
         </div>
         <div className="flex flex-col relative w-5/6 my-2">
-          <span className="absolute top-8 cursor-pointer text-lg right-2" onClick={()=>setIsShowPassword(!isShowPassword)}>
+          <span className="absolute top-8 cursor-pointer text-lg right-2" onClick={() => setIsShowPassword(!isShowPassword)}>
             {isShowPassword ? <VscEye /> : <VscEyeClosed />}
           </span>
           <label className="font-bold" htmlFor="">
@@ -83,14 +109,14 @@ const LoginPage = () => {
         </div>
         <button
           disabled={!formik.isValid}
-          className={`w-5/6 p-1 rounded-xl my-4 text-white ${
-            formik.isValid
-              ? "bg-purple-800  "
-              : "bg-purple-500 cursor-not-allowed"
-          }`}
+          className={`w-5/6 p-1 rounded-xl my-4 text-white ${formik.isValid
+            ? "bg-purple-800  "
+            : "bg-purple-500 cursor-not-allowed"
+            }`}
         >
           Login
         </button>
+        {error && <p className="text-red-400 text-center font-bold mb-4">{error}</p>}
         <Link to="/signup">
           <h6 className="text-sm text-purple-800">Not signup yet ? </h6>
         </Link>

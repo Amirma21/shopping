@@ -5,7 +5,6 @@ const Layout = ({ childern }) => {
     <div>
       <Navigation />
     <div>{childern}</div>
-    <div>Hello</div>
     </div>
   );
 };

@@ -108,7 +108,7 @@ const SummeryCart = ({ total }) => {
         <p>net price</p>
         <span className="font-bold">{total} $ </span>
       </div>
-      <Link to="/checkout">
+      <Link to="/signup?kojabayadbere=checkout">
         <button className="bg-purple-800 text-white w-full mt-6 p-1 rounded">
           go to checkout
         </button>
